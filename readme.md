@@ -41,7 +41,7 @@ Check out file `initialize_hmm.py`
 
 ## Sampling
 
-Then we create samples out of our model to be able to reason about it
+Given, the model prior probabilities, transition probabilities, observations, required to generate a number of samples, to be able to evaluate the sequence.
 
 Check out file `sampling.py`
 
@@ -114,4 +114,17 @@ Forward-Backward Algorithm, is used to solve one of the 3 basic problems that HM
     Intuitively, given a certain latent variable z[k],
     we are reasoning about this variable given all the future observations x[k+1:n].
 
-    Check out file `hmm_inference.py`
+    **Forward Backward Algorithm Improvement**
+    As we noticed forward backward algorithm needs to have both the forward list and backward list stored in memory for computing, where each of them is of length 300, number of sequences created \* number of iterations per sequence.
+
+    So why not? to compute forward backward step iteratively, without storing all values? This is exactly what we did in the `improved_forward_backward` method, reducing space needed in memory.
+
+    How we did this?
+
+    1. Run forward up to current timestamp 't'
+    2. Discard all keeping only the last message in forward list
+    3. Run backward pass for both b and f
+
+    yielding in a constant storage, independent of 't'
+
+Check out file `hmm_inference.py`

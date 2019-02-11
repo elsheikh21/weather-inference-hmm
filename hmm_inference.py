@@ -192,6 +192,15 @@ def improved_forward_backward(iterations,
                               transition_model,
                               true_observation_model,
                               false_observation_model):
+    '''
+    What we are basically doing is propagating the
+    forward message in backward manner
+
+    1. Run forward up to current timestamp 't'
+    2. Discard all keeping only the last message in forward list
+    [Up till here was done during computation of forward_algorithm]
+    3. Run backward pass for both b and f
+    '''
 
     transition_model_inv = np.linalg.inv(transition_model)
     finalbackward_fm_storage = []
@@ -236,6 +245,7 @@ def improved_forward_backward(iterations,
             index_last_forward += 1
         finalbackward_fm_storage.append(backward_fm_storage)
     return finalbackward_fm_storage
+
 
 def fixed_lag_smoothing(sequence_length, start_distribution_probability,
                         true_observation_model, false_observation_model,
