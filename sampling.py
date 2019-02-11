@@ -37,5 +37,5 @@ def sampling(iterations, sequence_length, states, observations,
             previous_state = np.random.choice(
                 a=states, p=transition_model.get(previous_state))
         sample.close()
-    print('[INFO] Created {} samples, each of {} days.\n'.format(
+    print('[INFO] Created {} samples, each of {} days. Sampling is saved.\n'.format(
         iterations, sequence_length))

@@ -1,0 +1,6 @@
+states >> ('rainy', 'not_rainy')
+observations >> ('umbrella', 'not_umbrella')
+transition_model >> {'rainy': [0.7, 0.3], 'not_rainy': [0.3, 0.7]}
+observation_model >> {'rainy': [0.9, 0.1], 'not_rainy': [0.2, 0.8]}
+observation_true_model >> {'rainy': [0.9, 0.0], 'not_rainy': [0.0, 0.2]}
+observation_false_model >> {'rainy': [0.0, 0.1], 'not_rainy': [0.8, 0.0]}
