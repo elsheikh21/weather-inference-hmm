@@ -1,6 +1,6 @@
 # Hidden Markov Models
 
-Use it:
+To use it:
 
 1. Clone the repo
 
@@ -8,9 +8,7 @@ Use it:
 
 2. Start by running `weather_hmm.py`
 
-Requirements: Native python libraries, nothing fancy
-
-Note: anything was needed as saving output to files, changing dictionaries to matrices, is included in `utils.py`
+requirements: Native python libraries, nothing fancy
 
 ---
 
@@ -41,90 +39,82 @@ Check out file `initialize_hmm.py`
 
 ## Sampling
 
-Given, the model prior probabilities, transition probabilities, observations, required to generate a number of samples, to be able to evaluate the sequence.
+Then we create samples out of our model to be able to reason about it
 
 Check out file `sampling.py`
 
 ## Inference
 
-Forward-Backward Algorithm, is used to solve one of the 3 basic problems that HMM can solve, which are:
+### Forward-Backward Algorithm
 
-1.  Evaluation Problem: it is simply the answer to what is the probability
-    that a particular sequence of symbols is produced by a model. And,
-    we use two algorithms forward algorithm or the backward
+It is used to solve one of the 3 basic problems that HMM can solve, which are:
 
-2.  Decoding Problem: given a sequence of observations and a model,
-    what is the most likely sequence of states produced these observations
+1. Evaluation Problem: it is simply the answer to what is the probability
+   that a particular sequence of symbols is produced by a model. And,
+   we use two algorithms forward algorithm or the backward
 
-3.  Training Problem: given model and set of sequences, find model that best
-    fits the data, we can use forward-backward algorithm
-    (gives marginal probability for each individual state),
-    maximum likelihood estimation,
-    or Viterbi training (probability of the most likely sequence of states)
+2. Decoding Problem: given a sequence of observations and a model,
+   what is the most likely sequence of states produced these observations
 
-    In our case, Forward Backward would tell you the probability [evaluation problem]
-    of weather being "sunny" for each day, Viterbi would give the most likely sequence
-    of sunny/rainy days, and the probability of this sequence.
+3. Training Problem: given model and set of sequences, find model that best
+   fits the data, we can use forward-backward algorithm
+   (gives marginal probability for each individual state),
+   maximum likelihood estimation,
+   or Viterbi training (probability of the most likely sequence of states)
 
-    Forward-Backward Algorithm: On its own, it isn't used for training an
-    HMM's parameters, but only for smoothing: computing
-    the marginal likelihoods of a sequence of states.
+   In our case, Forward Backward would tell you the probability [evaluation problem]
+   of weather being "sunny" for each day, Viterbi would give the most likely sequence
+   of sunny/rainy days, and the probability of this sequence.
 
-    **How it works?**
-    Forward Backward algorithm works in the following way.
+   Forward-Backward Algorithm: On its own, it isn't used for training an
+   HMM's parameters, but only for smoothing: computing
+   the marginal likelihoods of a sequence of states.
 
-    > Goal: Compute p(z[k]|x[1:n]) = p(x[k+1:n]|z[k]) \_ p(z[k], x[1:k])
-    > Forward_backward_algorithm = backward_step x forward_step
+### How it works?
 
-    For each sequence in the training set of sequences.
+Forward Backward algorithm works in the following way.
 
-    1. Calculate forward probabilities with the forward algorithm
-    2. Calculate backward probabilities with the backward algorithm
-    3. Calculate the contributions of the current sequence to the
-       transitions of the model, calculate the contributions of the current
-       sequence to the emission probabilities of the model.
-    4. Calculate the new model parameters (start probabilities,
-       transition probabilities, emission probabilities)
-    5. Calculate the new log likelihood of the model
-    6. Stop when the maximum number of iterations is passed -in this case-.
+> Goal: Compute p(z[k]|x[1:n]) = p(x[k+1:n]|z[k]) \* p(z[k], x[1:k])
+> Forward_backward_algorithm = backward_step x forward_step
 
-    **Forward Algorithm**
-    Algorithm goal to compute P(Z[k], X[1:k]), given the emission, transition,
-    starting probabilites. Trick to this algorithm is that we add one more
-    element which is z[k-1] and factor things over it using Markov Property
-    and d-separation for that one step back, yielding in a recursive property
+For each sequence in the training set of sequences.
 
-    > P(Z[k], X[1:k]) = Sum(p(x[k]|z[k]) _ p(z[k]|z[k-1]) _ p(z[k-1], x[1:k-1])),
-    > the summation is done over Z[k-1]
+1.  Calculate forward probabilities with the forward algorithm
+2.  Calculate backward probabilities with the backward algorithm
+3.  Calculate the contributions of the current sequence to the
+    transitions of the model, calculate the contributions of the current
+    sequence to the emission probabilities of the model.
+4.  Calculate the new model parameters (start probabilities,
+    transition probabilities, emission probabilities)
+5.  Calculate the new log likelihood of the model
+6.  Stop when the maximum number of iterations is passed -in this case-.
 
-    Beauty of this algorithm is it is of O(n\*(m^2)).
+### Forward Algorithm
 
-    Intuitively, given a certain observation x[k] about latent variable z[k],
-    we are reasoning about this observation given all the past events.
+Algorithm goal to compute P(Z[k], X[1:k]), given the emission, transition,
+starting probabilites. Trick to this algorithm is that we add one more
+element which is z[k-1] and factor things over it using Markov Property
+and d-separation for that one step back, yielding in a recursive property
 
-    **backward Algorithm**
-    Algorithm goal to compute P(X[k+1:n]|Z[k]), given the emission, transition,
-    starting probabilites. Trick to this algorithm is that we add one more
-    element which is z[k+1] and following same steps as the forward algorithm,
-    yielding in a recursive property.
+> P(Z[k], X[1:k]) = Sum(p(x[k]|z[k]) \* p(z[k]|z[k-1]) \* p(z[k-1], x[1:k-1])),
+> the summation is done over Z[k-1]
 
-    > P(X[k+1:n]|Z[k]) = Sum(p(x[k+2]|z[k+1]) _ p(x[k+1]|z[k+1]) _ p(z[k+1], z[k])),
-    > the summation is done over Z[k+1]
+Beauty of this algorithm is it is of O(n\*(m^2)).
 
-    Intuitively, given a certain latent variable z[k],
-    we are reasoning about this variable given all the future observations x[k+1:n].
+Intuitively, given a certain observation x[k] about latent variable z[k],
+we are reasoning about this observation given all the past events.
 
-    **Forward Backward Algorithm Improvement**
-    As we noticed forward backward algorithm needs to have both the forward list and backward list stored in memory for computing, where each of them is of length 300, number of sequences created \* number of iterations per sequence.
+### Backward Algorithm
 
-    So why not? to compute forward backward step iteratively, without storing all values? This is exactly what we did in the `improved_forward_backward` method, reducing space needed in memory.
+Algorithm goal to compute P(X[k+1:n]|Z[k]), given the emission, transition,
+starting probabilites. Trick to this algorithm is that we add one more
+element which is z[k+1] and following same steps as the forward algorithm,
+yielding in a recursive property.
 
-    How we did this?
+> P(X[k+1:n]|Z[k]) = Sum(p(x[k+2]|z[k+1]) \* p(x[k+1]|z[k+1]) \* p(z[k+1], z[k])),
+> the summation is done over Z[k+1]
 
-    1. Run forward up to current timestamp 't'
-    2. Discard all keeping only the last message in forward list
-    3. Run backward pass for both b and f
-
-    yielding in a constant storage, independent of 't'
+Intuitively, given a certain latent variable z[k],
+we are reasoning about this variable given all the future observations x[k+1:n].
 
 Check out file `hmm_inference.py`
